@@ -1,147 +1,90 @@
-# DocuBot Model Card
+# Music Recommender Model Card
 
-This model card is a short reflection on your DocuBot system. Fill it out after you have implemented retrieval and experimented with all three modes:
+## 1. Model Name
 
-1. Naive LLM over full docs  
-2. Retrieval only  
-3. RAG (retrieval plus LLM)
-
-Use clear, honest descriptions. It is fine if your system is imperfect.
+**VibeFinder 1.0** — A content-based music recommendation simulator.
 
 ---
 
-## 1. System Overview
+## 2. Goal / Task
 
-**What is DocuBot trying to do?**  
-Describe the overall goal in 2 to 3 sentences.
-
-> _Your answer here._
-
-**What inputs does DocuBot take?**  
-For example: user question, docs in folder, environment variables.
-
-> _Your answer here._
-
-**What outputs does DocuBot produce?**
-
-> _Your answer here._
+VibeFinder tries to predict which songs a user will enjoy based on their stated preferences for genre, mood, and numerical audio features (energy, valence, danceability). It takes a user taste profile and a song catalog, then returns a ranked list of the top matching songs with explanations for each score.
 
 ---
 
-## 2. Retrieval Design
+## 3. Data Used
 
-**How does your retrieval system work?**  
-Describe your choices for indexing and scoring.
-
-- How do you turn documents into an index?
-- How do you score relevance for a query?
-- How do you choose top snippets?
-
-> _Your answer here._
-
-**What tradeoffs did you make?**  
-For example: speed vs precision, simplicity vs accuracy.
-
-> _Your answer here._
+- **Dataset size:** 20 songs in `data/songs.csv`
+- **Features per song (14 total):** title, artist, genre, mood, energy (0-1), tempo_bpm, valence (0-1), danceability (0-1), acousticness (0-1), popularity (0-100), release_decade, mood_tag, instrumentalness (0-1), lyricalness (0-1)
+- **Genre distribution:** pop (4), rock (3), electronic (3), hip-hop (3), classical (2), lofi (1), ambient (1), acoustic (1), indie (1), soul (1)
+- **Limitations:** The dataset is hand-curated and small. Pop, rock, electronic, and hip-hop are over-represented. Genres like lofi, ambient, acoustic, indie, and soul each have only one song, making it impossible for the system to provide variety within those genres. There is no user listening history or collaborative data — all recommendations are purely attribute-based.
 
 ---
 
-## 3. Use of the LLM (Gemini)
+## 4. Algorithm Summary
 
-**When does DocuBot call the LLM and when does it not?**  
-Briefly describe how each mode behaves.
+The system uses a weighted point system to score each song against a user profile. In the default "balanced" mode:
 
-- Naive LLM mode:
-- Retrieval only mode:
-- RAG mode:
+1. **Genre match** — Exact match awards +2.0 points (binary).
+2. **Mood match** — Exact match awards +1.0 point (binary).
+3. **Mood tag match** — Exact match on detailed mood tag awards +0.8 (binary).
+4. **Decade match** — Exact match on release decade awards +0.5 (binary).
+5. **Popularity similarity** — `0.3 * (1 - |song - target| / 100)`. Awards up to +0.3.
+6. **Energy similarity** — `1.0 * (1 - |song - target|)`. Awards up to +1.0.
+7. **Valence similarity** — Closeness formula, weighted at 0.5. Awards up to +0.5.
+8. **Danceability similarity** — Closeness formula, weighted at 0.5. Awards up to +0.5.
+9. **Acousticness similarity** — Closeness formula, weighted at 0.3. Awards up to +0.3.
+10. **Instrumentalness similarity** — Closeness formula, weighted at 0.3. Awards up to +0.3.
+11. **Lyricalness similarity** — Closeness formula, weighted at 0.3. Awards up to +0.3.
 
-> _Your answer here._
-
-**What instructions do you give the LLM to keep it grounded?**  
-Summarize the rules from your prompt. For example: only use snippets, say "I do not know" when needed, cite files.
-
-> _Your answer here._
-
----
-
-## 4. Experiments and Comparisons
-
-Run the **same set of queries** in all three modes. Fill in the table with short notes.
-
-You can reuse or adapt the queries from `dataset.py`.
-
-| Query | Naive LLM: helpful or harmful? | Retrieval only: helpful or harmful? | RAG: helpful or harmful? | Notes |
-|------|---------------------------------|--------------------------------------|---------------------------|-------|
-| Example: Where is the auth token generated? | | | | |
-| Example: How do I connect to the database? | | | | |
-| Example: Which endpoint lists all users? | | | | |
-| Example: How does a client refresh an access token? | | | | |
-
-**What patterns did you notice?**  
-
-- When does naive LLM look impressive but untrustworthy?  
-- When is retrieval only clearly better?  
-- When is RAG clearly better than both?
-
-> _Your answer here._
+Total possible score (balanced): ~7.5. The system supports 5 scoring modes (balanced, genre-first, mood-first, energy-focused, discovery) that redistribute these weights. A diversity penalty reduces scores for songs whose artist or genre already appears in the top results. Songs are sorted by adjusted score descending and the top *k* are returned.
 
 ---
 
-## 5. Failure Cases and Guardrails
+## 5. Observed Behavior / Biases
 
-**Describe at least two concrete failure cases you observed.**  
-For each one, say:
-
-- What was the question?  
-- What did the system do?  
-- What should have happened instead?
-
-> _Failure case 1 here._
-
-> _Failure case 2 here._
-
-**When should DocuBot say “I do not know based on the docs I have”?**  
-Give at least two specific situations.
-
-> _Your answer here._
-
-**What guardrails did you implement?**  
-Examples: refusal rules, thresholds, limits on snippets, safe defaults.
-
-> _Your answer here._
+- **Genre dominance:** Genre match is worth 2.0 points, which is 40% of the maximum score. A song from the "wrong" genre must score near-perfect on every other feature to compete. This creates a **filter bubble** where users rarely discover songs outside their preferred genre.
+- **Pop over-representation:** With 4 pop songs vs. 1 lofi song, pop-preferring users get more varied recommendations while lofi-preferring users see the same song every time.
+- **Binary categorical matching:** The system treats "rock" and "indie" as equally different from each other as "rock" and "classical." In reality, rock and indie share significant musical overlap.
+- **No temporal or contextual awareness:** The system doesn't account for time of day, listening context, or recent activity. A user's morning preferences likely differ from late-night ones.
+- **Same song, every list:** In the "Sad Acoustic" profile, Nuvole Bianche always ranks #1 with a near-perfect 4.98 score because there are only two classical songs. Adding more classical/sad songs would improve diversity.
 
 ---
 
-## 6. Limitations and Future Improvements
+## 6. Evaluation Process
 
-**Current limitations**  
-List at least three limitations of your DocuBot system.
+Tested with 5 distinct user profiles designed to span different musical tastes:
 
-1. _Limitation 1_
-2. _Limitation 2_
-3. _Limitation 3_
+| Profile | Top Result | Score | Feels Right? |
+|---------|-----------|-------|-------------|
+| High-Energy Pop | Levitating (Dua Lipa) | 4.91 | Yes — upbeat pop hit |
+| Chill Lofi | Lofi Sunrise (Sleepy Fish) | 4.90 | Yes — relaxed lofi track |
+| Deep Intense Rock | Smells Like Teen Spirit (Nirvana) | 3.95 | Yes — iconic intense rock |
+| EDM Party | Midnight City (M83) | 4.85 | Yes — energetic electronic |
+| Sad Acoustic | Nuvole Bianche (Einaudi) | 4.98 | Yes — quiet, melancholy piano |
 
-**Future improvements**  
-List two or three changes that would most improve reliability or usefulness.
+**Sensitivity experiment:** Switching from "balanced" to "energy-focused" mode (energy 1.0->3.0, genre 2.0->0.5) caused cross-genre songs to rise (Lose Yourself jumped from #4 to #2 for the Rock profile). Using "discovery" mode (genre=0.0) completely removed genre bias. This confirmed that the weight balance is the most influential design decision in the system.
 
-1. _Improvement 1_
-2. _Improvement 2_
-3. _Improvement 3_
+**Diversity penalty experiment:** Without the diversity penalty, the "High-Energy Pop" top 4 were all pop songs. With the penalty, the same songs appear but their adjusted scores reflect the repetition, and cross-genre songs with strong numerical matches become more competitive.
+
+---
+
+## 7. Intended Use and Non-Intended Use
+
+**Intended use:**
+- Educational simulation to learn how content-based recommenders work
+- Demonstrating the relationship between feature weights and recommendation outcomes
+- Exploring filter bubble effects in simple algorithms
+
+**Not intended for:**
+- Production music streaming (dataset is too small, no collaborative filtering)
+- Making inferences about real user behavior or musical preferences
+- Replacing human curation or editorial playlists
 
 ---
 
-## 7. Responsible Use
+## 8. Ideas for Improvement
 
-**Where could this system cause real world harm if used carelessly?**  
-Think about wrong answers, missing information, or over trusting the LLM.
-
-> _Your answer here._
-
-**What instructions would you give real developers who want to use DocuBot safely?**  
-Write 2 to 4 short bullet points.
-
-- _Guideline 1_
-- _Guideline 2_
-- _Guideline 3 (optional)_
-
----
+1. **Add genre similarity** — Instead of binary match, use a genre distance matrix so "indie" and "rock" are treated as partially similar rather than completely different.
+2. **Expand the dataset** — A larger, more balanced catalog (100+ songs across all genres) would reduce over-representation bias and improve recommendation diversity.
+3. **Build a web UI** — Let users adjust profile sliders in a browser and see recommendations update in real time, making the system interactive.

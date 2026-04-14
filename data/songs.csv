@@ -1,0 +1,21 @@
+title,artist,genre,mood,energy,tempo_bpm,valence,danceability,acousticness,popularity,release_decade,mood_tag,instrumentalness,lyricalness
+Blinding Lights,The Weeknd,pop,happy,0.73,171,0.81,0.51,0.00,95,2020,euphoric,0.00,0.85
+Levitating,Dua Lipa,pop,happy,0.69,103,0.91,0.70,0.03,88,2020,euphoric,0.00,0.80
+Bohemian Rhapsody,Queen,rock,epic,0.40,72,0.22,0.30,0.28,90,1970,dramatic,0.05,0.95
+Smells Like Teen Spirit,Nirvana,rock,angry,0.91,117,0.26,0.50,0.00,85,1990,aggressive,0.00,0.75
+Weightless,Marconi Union,ambient,chill,0.15,60,0.30,0.10,0.85,45,2010,dreamy,0.95,0.00
+Lofi Sunrise,Sleepy Fish,lofi,chill,0.25,80,0.55,0.35,0.90,30,2020,dreamy,0.70,0.05
+Shape of You,Ed Sheeran,pop,happy,0.65,96,0.93,0.82,0.58,92,2010,playful,0.00,0.90
+Lose Yourself,Eminem,hip-hop,intense,0.90,171,0.37,0.57,0.01,88,2000,aggressive,0.00,0.95
+Midnight City,M83,electronic,energetic,0.80,105,0.62,0.56,0.02,78,2010,euphoric,0.40,0.50
+Nuvole Bianche,Ludovico Einaudi,classical,sad,0.10,70,0.18,0.08,0.98,65,2000,melancholic,0.98,0.00
+Sicko Mode,Travis Scott,hip-hop,intense,0.73,155,0.45,0.83,0.01,90,2010,aggressive,0.05,0.85
+Sunflower,Post Malone,pop,happy,0.48,90,0.91,0.76,0.56,91,2010,playful,0.00,0.80
+Thunderstruck,AC/DC,rock,energetic,0.89,134,0.45,0.46,0.01,82,1990,aggressive,0.10,0.70
+Clair de Lune,Debussy,classical,sad,0.05,65,0.12,0.05,0.99,70,1900,melancholic,1.00,0.00
+Get Lucky,Daft Punk,electronic,happy,0.68,116,0.87,0.78,0.05,86,2010,euphoric,0.15,0.65
+Strobe,Deadmau5,electronic,energetic,0.85,128,0.30,0.55,0.01,72,2000,dreamy,0.90,0.00
+Banana Pancakes,Jack Johnson,acoustic,chill,0.30,95,0.75,0.55,0.91,60,2000,nostalgic,0.10,0.80
+DNA,Kendrick Lamar,hip-hop,intense,0.85,140,0.42,0.64,0.00,87,2010,aggressive,0.00,0.90
+Electric Feel,MGMT,indie,happy,0.62,100,0.78,0.72,0.17,75,2000,psychedelic,0.20,0.65
+Back to Black,Amy Winehouse,soul,sad,0.35,120,0.22,0.50,0.33,80,2000,melancholic,0.05,0.90
